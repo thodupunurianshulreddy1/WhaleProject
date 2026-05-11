@@ -1,0 +1,10 @@
+.venv/
+    __pycache__/
+    lake/
+    .DS_Store
+    ```
+
+```python
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BRONZE_PATH = os.path.join(BASE_DIR, "lake", "bronze")

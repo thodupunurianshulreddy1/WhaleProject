@@ -3,14 +3,14 @@ import json
 import os
 from datetime import datetime
 
-API_KEY = "YOUR_ETHERSCAN_API_KEY"
+API_KEY = "KERIZSGWDRX7X98NVW9AAH79F7V7DFHTWW"
 
 ADDRESSES = [
-    "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
-    "0x28C6c06298d514Db089934071355E5743bf21d60",
-    "0x21a31Ee1afC51d94C2eFcCAa2092aD1028285549",
-    "0x56Eddb7aa87536c09CCc2793473599fD21A8b17F",
-    "0xF977814e90dA44bFA03b6295A0616a897441aceC"
+    "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "0x1d2f0da169ceb9fc7b3144628db156f3f6c60dbe",
+    "0x50327c6c5a14dcade707abad2e27eb517df87ab5",
+    "0xba2ae424d960c26247dd6c32edc70b295c744c43"
 ]
 
 BASE_DIR = os.path.expanduser("~/Desktop/WhaleProject/datalake/raw/etherscan/transactions")

@@ -1,13 +1,8 @@
 import os
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import lit, col
+import pandas as pd
 
-spark = SparkSession.builder \
-    .appName("CombineMarketWhales") \
-    .getOrCreate()
-
-FORMATTED_BASE = r"C:\Users\Famille\Documents\ISEP\Big DATA\Project\datalake\formatted"
-USAGE_BASE = r"C:\Users\Famille\Documents\ISEP\Big DATA\Project\datalake\usage\whale_analysis\market_impact"
+FORMATTED_BASE = r"C:\Users\Famille\WhaleProject\datalake\formatted"
+USAGE_BASE = r"C:\Users\Famille\WhaleProject\datalake\usage"
 
 ADDRESS_TO_COIN = {
     "0x2170ed0880ac9a755fd29b2688956bd959f933f8": "ethereum",
@@ -17,36 +12,61 @@ ADDRESS_TO_COIN = {
     "0xba2ae424d960c26247dd6c32edc70b295c744c43": "dogecoin"
 }
 
-all_transactions = None
+all_transactions = []
 
 for address, coin_id in ADDRESS_TO_COIN.items():
-    path = os.path.join(FORMATTED_BASE, address)
+    path = os.path.join(FORMATTED_BASE, f"{address}.parquet")
 
-    df = spark.read.parquet(path) \
-        .withColumn("contract_address", lit(address)) \
-        .withColumn("coin_id", lit(coin_id))
+    if not os.path.exists(path):
+        print(f"Missing file: {path}")
+        continue
 
-    all_transactions = df if all_transactions is None else all_transactions.unionByName(df, allowMissingColumns=True)
+    print(f"Reading: {path}")
 
-markets_path = os.path.join(FORMATTED_BASE, "markets_20260518_200539")
-markets_df = spark.read.parquet(markets_path)
+    df = pd.read_parquet(path)
+    df["contract_address"] = address
+    df["coin_id"] = coin_id
 
-markets_clean = markets_df.select(
-    col("id").alias("coin_id"),
-    col("symbol"),
-    col("name"),
-    col("current_price"),
-    col("market_cap"),
-    col("total_volume"),
-    col("price_change_percentage_24h")
+    all_transactions.append(df)
+
+if not all_transactions:
+    raise ValueError("No transaction parquet files were found.")
+
+transactions_df = pd.concat(all_transactions, ignore_index=True)
+
+# Your markets file
+markets_path = os.path.join(
+    FORMATTED_BASE,
+    "markets_20260518_200539.parquet"
 )
 
-combined_df = all_transactions.join(markets_clean, on="coin_id", how="left")
+if not os.path.exists(markets_path):
+    raise FileNotFoundError(f"Missing markets file: {markets_path}")
 
-combined_df.show(10, truncate=False)
+markets_df = pd.read_parquet(markets_path)
 
-combined_df.write.mode("overwrite").parquet(USAGE_BASE)
+markets_clean = markets_df[
+    [
+        "id",
+        "symbol",
+        "name",
+        "current_price",
+        "market_cap",
+        "total_volume",
+        "price_change_percentage_24h"
+    ]
+].rename(columns={"id": "coin_id"})
 
-print(f"Combined usage dataset created at: {USAGE_BASE}")
+combined_df = transactions_df.merge(
+    markets_clean,
+    on="coin_id",
+    how="left"
+)
 
-spark.stop()
+os.makedirs(USAGE_BASE, exist_ok=True)
+
+output_file = os.path.join(USAGE_BASE, "market_impact_combined.parquet")
+combined_df.to_parquet(output_file, index=False)
+
+print(f"Combined dataset created: {output_file}")
+print(combined_df.head())

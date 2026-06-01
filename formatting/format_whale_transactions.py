@@ -1,45 +1,41 @@
-import os
-import json
-from pyspark.sql import SparkSession
+import pandas as pd
+from pathlib import Path
 
-spark = SparkSession.builder.appName("FormatEtherscanTransactions").getOrCreate()
-
-ADDRESSES = [
+# List of addresses / filenames (without .json)
+addresses = [
+    "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
     "0x1d2f0da169ceb9fc7b3144628db156f3f6c60dbe",
     "0x50327c6c5a14dcade707abad2e27eb517df87ab5",
     "0xba2ae424d960c26247dd6c32edc70b295c744c43",
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    "markets_20260518_200539"
 ]
 
-RAW_BASE = r"C:\Users\Famille\Documents\ISEP\Big DATA\Project"
-FORMATTED_BASE = r"C:\Users\Famille\Documents\ISEP\Big DATA\Project\datalake\_formatted"
-TEMP_BASE = r"C:\Users\Famille\Documents\ISEP\Big DATA\Project\datalake\temp"
+# Base folders
+input_folder = Path(r"C:\Users\Famille\WhaleProject\datalake\raw")
+output_folder = Path(r"C:\Users\Famille\WhaleProject\datalake\formatted")
 
-os.makedirs(TEMP_BASE, exist_ok=True)
+# Create output folder if needed
+output_folder.mkdir(parents=True, exist_ok=True)
 
-for address in ADDRESSES:
-    input_path = os.path.join(RAW_BASE, f"{address}.json")
-    temp_path = os.path.join(TEMP_BASE, f"{address}_clean.json")
-    output_path = os.path.join(FORMATTED_BASE, address)
+# Loop through all files
+for address in addresses:
 
-    print(f"Processing address: {address}")
+    # Build full input/output paths
+    input_json_path = input_folder / f"{address}.json"
+    output_parquet_path = output_folder / f"{address}.parquet"
 
-    with open(input_path, "r", encoding="utf-8") as f:
-        raw_data = json.load(f)
+    try:
+        # Read JSON
+        df = pd.read_json(input_json_path)
 
-    records = raw_data.get("result", [])
+        # If your files are JSONL instead, use this instead:
+        # df = pd.read_json(input_json_path, lines=True)
 
-    if not records:
-        print(f"No transactions found for {address}")
-        continue
+        # Save parquet
+        df.to_parquet(output_parquet_path, engine="pyarrow", index=False)
 
-    with open(temp_path, "w", encoding="utf-8") as f:
-        for row in records:
-            f.write(json.dumps(row) + "\n")
+        print(f"SUCCESS: {input_json_path.name} -> {output_parquet_path.name}")
 
-    df = spark.read.json(temp_path)
-    df.write.mode("overwrite").parquet(output_path)
-
-    print(f"Parquet created: {output_path}")
-
-spark.stop()
+    except Exception as e:
+        print(f"ERROR processing {input_json_path.name}: {e}")

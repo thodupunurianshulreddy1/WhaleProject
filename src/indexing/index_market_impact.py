@@ -1,10 +1,11 @@
 import pandas as pd
 from elasticsearch import Elasticsearch, helpers
 
+#The path of Jeannette's computer
 PARQUET_PATH = r"C:\Users\Famille\WhaleProject\datalake\usage\market_impact_combined.parquet"
 INDEX_NAME = "market_impact"
 
-es = Elasticsearch("http://localhost:9200")
+es = Elasticsearch("http://localhost:9200") #port
 
 df = pd.read_parquet(PARQUET_PATH)
 df = df.fillna("")

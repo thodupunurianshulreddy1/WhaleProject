@@ -3,7 +3,7 @@ import pandas as pd
 
 FORMATTED_BASE = r"C:\Users\Famille\WhaleProject\datalake\formatted"
 USAGE_BASE = r"C:\Users\Famille\WhaleProject\datalake\usage"
-
+#combining blockchain addresses to their coins 
 ADDRESS_TO_COIN = {
     "0x2170ed0880ac9a755fd29b2688956bd959f933f8": "ethereum",
     "0xdac17f958d2ee523a2206206994597c13d831ec7": "tether",

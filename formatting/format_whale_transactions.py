@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-# List of addresses / filenames (without .json)
+# List of addresses 
 addresses = [
     "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
     "0xdac17f958d2ee523a2206206994597c13d831ec7",
@@ -15,7 +15,7 @@ addresses = [
 input_folder = Path(r"C:\Users\Famille\WhaleProject\datalake\raw")
 output_folder = Path(r"C:\Users\Famille\WhaleProject\datalake\formatted")
 
-# Create output folder if needed
+# Create output folder 
 output_folder.mkdir(parents=True, exist_ok=True)
 
 # Loop through all files
@@ -29,8 +29,6 @@ for address in addresses:
         # Read JSON
         df = pd.read_json(input_json_path)
 
-        # If your files are JSONL instead, use this instead:
-        # df = pd.read_json(input_json_path, lines=True)
 
         # Save parquet
         df.to_parquet(output_parquet_path, engine="pyarrow", index=False)

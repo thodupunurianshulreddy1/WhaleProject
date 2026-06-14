@@ -5,6 +5,7 @@ from datetime import datetime
 
 API_KEY = "KERIZSGWDRX7X98NVW9AAH79F7V7DFHTWW"
 
+#different adresses of the smart contracts
 ADDRESSES = [
     "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
     "0xdac17f958d2ee523a2206206994597c13d831ec7",

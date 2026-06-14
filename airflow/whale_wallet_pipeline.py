@@ -1,6 +1,6 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.operators.empty import EmptyOperator
+#from airflow.operators.empty import EmptyOperator
 
 with DAG(
     dag_id="whale_wallet_tracking_pipeline",
